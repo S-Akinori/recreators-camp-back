@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
@@ -23,7 +24,7 @@ use Illuminate\Support\Facades\Route;
 
 // ログインと新規登録のルーティング
 // Route::post('/register', 'App\Http\Controllers\AuthController@register');
-// Route::post('/login', 'App\Http\Controllers\AuthController@login');
+// Route::post('/login',[AuthController::class, 'login']);
 // Route::post('/test', 'App\Http\Controllers\AuthController@test');
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {

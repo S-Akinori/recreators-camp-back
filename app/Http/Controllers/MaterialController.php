@@ -46,8 +46,8 @@ class MaterialController extends Controller
             'permission' => 'required',
         ]);
 
-        $image = $request->file('image')->store('');
-        $file = $request->file('file')->store('');
+        $image = $request->file('image')->store('public');
+        $file = $request->file('file')->store('private');
 
         $image_path = env('APP_URL') . Storage::url($image);
         $file_path = env('APP_URL') . Storage::url($file);
@@ -110,8 +110,8 @@ class MaterialController extends Controller
     {
         $material = Material::find($id);
         $filename = basename($material->file);
-        $filepath = storage_path('app/public/'. $filename);
-        $mimetype = Storage::mimeType('public/'.$filename);
+        $filepath = storage_path('app/private/'. $filename);
+        $mimetype = Storage::mimeType('private/'.$filename);
         $headers = [
           'Content-Type' => $mimetype,
           'Content-Disposition' => 'attachment; filename="'.$filename.'"',

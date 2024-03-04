@@ -35,7 +35,7 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'role' => 'creator',
-            'image' => 'http://localhost/storage/user-icon.png',
+            'image' => config('app.url').'/storage/user-icon.png',
             'password' => Hash::make($input['password']),
         ]);
     }

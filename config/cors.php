@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost','http://localhost:3000','https://fbef-240b-10-2aa0-1700-c14d-e3a1-7e9a-29b8.ngrok-free.app'],
+    'allowed_origins' => ['http://localhost','http://localhost:3000', 'http://127.0.0.1', 'http://127.0.0.1:3000','https://recreators-camp-front.akinorisahoda.com'],
 
     'allowed_origins_patterns' => [],
 

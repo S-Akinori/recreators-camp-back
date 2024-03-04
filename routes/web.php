@@ -19,3 +19,7 @@ Route::get('/', function () {
 
 // Route::post('/register', 'App\Http\Controllers\AuthController@register');
 // Route::post('/login', 'App\Http\Controllers\AuthController@login');
+
+Route::get('/', function () {
+  return view('welcome');
+})->name('login');
