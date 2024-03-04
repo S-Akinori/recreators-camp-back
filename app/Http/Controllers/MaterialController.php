@@ -49,8 +49,8 @@ class MaterialController extends Controller
         $image = $request->file('image')->store('public');
         $file = $request->file('file')->store('private');
 
-        $image_path = env('APP_URL') . Storage::url($image);
-        $file_path = env('APP_URL') . Storage::url($file);
+        $image_path = config('app.url') . Storage::url($image);
+        $file_path = config('app.url') . Storage::url($file);
         
 
         $material = Material::create([

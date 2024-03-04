@@ -25,7 +25,10 @@ use Illuminate\Support\Facades\Route;
 // ログインと新規登録のルーティング
 // Route::post('/register', 'App\Http\Controllers\AuthController@register');
 // Route::post('/login',[AuthController::class, 'login']);
-// Route::post('/test', 'App\Http\Controllers\AuthController@test');
+Route::get('/test', function(Request $request) {
+  Log::info(config('app.url'));
+  return response()->json(config('app.url'), 200);
+});
 
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
