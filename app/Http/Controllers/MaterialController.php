@@ -16,16 +16,16 @@ class MaterialController extends Controller
     public function index(Request $request)
     {
       if($request->has('category_id')) {
-        $materials = Material::with('user')->where('category_id', $request->category_id)->get();
+        $materials = Material::with('user')->where('category_id', $request->category_id)->paginate(8);
         return $materials;
       }
 
       if($request->has('user_id')) {
-        $materials = Material::with('user')->where('user_id', $request->user_id)->get();
+        $materials = Material::with('user')->where('user_id', $request->user_id)->paginate(8);
         return $materials;
       }
 
-      $materials = Material::with('user')->get();
+      $materials = Material::with('user')->paginate(8);
       return $materials;
     }
 
@@ -71,7 +71,6 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
-      Log::info(Auth::check());
       if(auth()->check()) {
         $userId = Auth::id();
         $material = Material::with([
@@ -80,6 +79,9 @@ class MaterialController extends Controller
             $query->where('user_id', $userId);
           },
           'favorites' => function ($query) use ($userId) {
+            $query->where('user_id', $userId);
+          },
+          'permissionTokens' => function ($query) use ($userId) {
             $query->where('user_id', $userId);
           }
         ])->find($id);
@@ -95,7 +97,38 @@ class MaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        Log::info($request->all());
+        $validated = $request->validate([
+            'name' => 'required',
+            'description' => 'required',
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'file' => 'file',
+            'category_id' => 'required|exists:categories,id',
+            'permission' => 'required',
+        ]);
+
+        $material = Material::find($id);
+
+        if($request->hasFile('image')) {
+          $image = $request->file('image')->store('public');
+          $image_path = config('app.url') . Storage::url($image);
+          $material->image = $image_path;
+        }
+
+        if($request->hasFile('file')) {
+          $file = $request->file('file')->store('private');
+          $file_path = config('app.url') . Storage::url($file);
+          $material->file = $file_path;
+        }
+
+        $material->name = $validated['name'];
+        $material->description = $validated['description'];
+        $material->category_id = $validated['category_id'];
+        $material->permission = $validated['permission'];
+        $material->save();
+
+        return $material;
+
     }
 
     /**
@@ -104,6 +137,9 @@ class MaterialController extends Controller
     public function destroy(string $id)
     {
         //
+        $material = Material::find($id);
+        $material->delete();
+        return $material;
     }
 
     public function download(string $id)

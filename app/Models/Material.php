@@ -35,4 +35,8 @@ class Material extends Model
     {
         return $this->hasMany(Favorite::class);
     }
+    public function permissionTokens()
+    {
+        return $this->hasMany(PermissionToken::class);
+    }
 }

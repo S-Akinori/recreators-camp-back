@@ -59,4 +59,8 @@ class User extends Authenticatable
     {
         return $this->hasMany(Favorite::class);
     }
+    public function permissionTokens()
+    {
+        return $this->hasMany(PermissionToken::class);
+    }
 }

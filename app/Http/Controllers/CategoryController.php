@@ -30,8 +30,9 @@ class CategoryController extends Controller
     public function show(string $id)
     {
         //
-        $category = Category::with('materials.user')->find($id);
-        return $category;
+        $category = Category::find($id);
+        $materials = $category->materials()->paginate(8);
+        return ['category' => $category, 'materials' => $materials];
     }
 
     /**

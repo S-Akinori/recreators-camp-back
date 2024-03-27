@@ -2,9 +2,12 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
 use App\Http\Controllers\MaterialLikeController;
+use App\Http\Controllers\PermissionRequestController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMaterialController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -45,3 +48,14 @@ Route::get('/users/{user_id}/materials', [UserMaterialController::class, 'index'
 
 Route::resource('/materials.likes', MaterialLikeController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
 Route::resource('/materials.favorites', MaterialFavoriteController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
+
+Route::middleware('auth:sanctum')->post('/materials/{id}/permission_request', [PermissionRequestController::class, 'send']);
+
+Route::middleware('auth:sanctum')->get('/permission_tokens/{id}', [PermissionRequestController::class, 'show']);
+Route::middleware('auth:sanctum')->put('/permission_tokens/{id}', [PermissionRequestController::class, 'update']);
+Route::middleware('auth:sanctum')->get('/permission_tokens/materials/{id}', [PermissionRequestController::class, 'showByMaterialId']);
+
+Route::get('/users', [UserController::class, 'index']);
+Route::get('/users/{id}', [UserController::class, 'show']);
+
+Route::post('/file', [FileUploadController::class, 'store']);
