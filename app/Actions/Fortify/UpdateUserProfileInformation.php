@@ -31,6 +31,10 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'image' => ['string']
         ])->validateWithBag('updateProfileInformation');
 
+        if(!array_key_exists('image', $input)) {
+            $input['image'] = $user->image;
+        }
+
         if ($input['email'] !== $user->email &&
             $user instanceof MustVerifyEmail) {
             $this->updateVerifiedUser($user, $input);
