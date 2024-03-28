@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
@@ -59,3 +60,5 @@ Route::get('/users', [UserController::class, 'index']);
 Route::get('/users/{id}', [UserController::class, 'show']);
 
 Route::post('/file', [FileUploadController::class, 'store']);
+
+Route::post('/contact', [ContactController::class, 'send']);
