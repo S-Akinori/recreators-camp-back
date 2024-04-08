@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CategoryController extends Controller
 {
@@ -27,11 +28,12 @@ class CategoryController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
         //
+        $order_by = $request->order_by ?? 'download_count';
         $category = Category::find($id);
-        $materials = $category->materials()->paginate(8);
+        $materials = $category->materials()->with('user')->orderBy($order_by, 'desc')->paginate(8);
         return ['category' => $category, 'materials' => $materials];
     }
 

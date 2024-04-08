@@ -15,18 +15,18 @@ class MaterialController extends Controller
      */
     public function index(Request $request)
     {
-      if($request->has('category_id')) {
-        $materials = Material::with('user')->where('category_id', $request->category_id)->paginate(8);
-        return $materials;
-      }
+        if ($request->has('category_id')) {
+            $query = Material::with('user')->where('category_id', $request->category_id);
+        } else if ($request->has('user_id')) {
+            $query = Material::with('user')->where('user_id', $request->user_id);
+        } else {
+            $query = Material::with('user');
+        }
 
-      if($request->has('user_id')) {
-        $materials = Material::with('user')->where('user_id', $request->user_id)->paginate(8);
-        return $materials;
-      }
+        $order_by = $request->order_by ?? 'download_count';
 
-      $materials = Material::with('user')->paginate(8);
-      return $materials;
+        $materials = $query->orderBy($order_by, 'desc')->paginate(8);
+        return $materials;
     }
 
 
@@ -40,23 +40,35 @@ class MaterialController extends Controller
         $validated = $request->validate([
             'name' => 'required',
             'description' => 'required',
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images' => 'required|array',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'file' => 'required|file',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
         ]);
 
-        $image = $request->file('image')->store('public');
-        $file = $request->file('file')->store('private');
-
-        $image_path = config('app.url') . Storage::url($image);
-        $file_path = config('app.url') . Storage::url($file);
         
+        $file = $request->file('file')->store('private');
+        
+        $paths = [];
+        foreach ($request->file('images') as $image) {
+            // 画像ファイルを保存する処理
+            $path = $image->store('public');
+            
+            // ファイルパスを配列に追加
+            $paths[] = config('app.url') . Storage::url($path);
+        }
+
+        Log::debug($paths);
+
+        $file_path = config('app.url') . Storage::url($file);
+
 
         $material = Material::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
-            'image' => $image_path,
+            'image' => $paths[0],
+            'images' => $paths,
             'file' => $file_path,
             'user_id' => auth()->id(),
             'category_id' => $validated['category_id'],
@@ -71,25 +83,25 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
-      if(auth()->check()) {
-        $userId = Auth::id();
-        $material = Material::with([
-          'user',
-          'likes' => function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-          },
-          'favorites' => function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-          },
-          'permissionTokens' => function ($query) use ($userId) {
-            $query->where('user_id', $userId);
-          }
-        ])->find($id);
-      } else {
-        $material = Material::with('user')->find($id);
-      }
+        if (auth()->check()) {
+            $userId = Auth::id();
+            $material = Material::with([
+                'user',
+                'likes' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                },
+                'favorites' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                },
+                'permissionTokens' => function ($query) use ($userId) {
+                    $query->where('user_id', $userId);
+                }
+            ])->find($id);
+        } else {
+            $material = Material::with('user')->find($id);
+        }
 
-      return $material;
+        return $material;
     }
 
     /**
@@ -97,11 +109,11 @@ class MaterialController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        Log::info($request->all());
         $validated = $request->validate([
             'name' => 'required',
             'description' => 'required',
             'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'file' => 'file',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
@@ -109,16 +121,30 @@ class MaterialController extends Controller
 
         $material = Material::find($id);
 
-        if($request->hasFile('image')) {
-          $image = $request->file('image')->store('public');
-          $image_path = config('app.url') . Storage::url($image);
-          $material->image = $image_path;
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $image) {
+                $filename = $image->getClientOriginalName();
+                $exists = Storage::disk('public')->exists($filename);
+                Log::debug($filename);
+                Log::debug($exists);
+                if($exists) {
+                    $paths[] = config('app.url') . Storage::url($filename);
+                } else {
+                    // 画像ファイルを保存する処理
+                    $path = $image->store('public');
+                    
+                    // ファイルパスを配列に追加
+                    $paths[] = config('app.url') . Storage::url($path);
+                }
+            }
+            $material->images = $paths;
+            $material->image = $paths[0];
         }
 
-        if($request->hasFile('file')) {
-          $file = $request->file('file')->store('private');
-          $file_path = config('app.url') . Storage::url($file);
-          $material->file = $file_path;
+        if ($request->hasFile('file')) {
+            $file = $request->file('file')->store('private');
+            $file_path = config('app.url') . Storage::url($file);
+            $material->file = $file_path;
         }
 
         $material->name = $validated['name'];
@@ -128,7 +154,6 @@ class MaterialController extends Controller
         $material->save();
 
         return $material;
-
     }
 
     /**
@@ -146,13 +171,16 @@ class MaterialController extends Controller
     {
         $material = Material::find($id);
         $filename = basename($material->file);
-        $filepath = storage_path('app/private/'. $filename);
-        $mimetype = Storage::mimeType('private/'.$filename);
+        $filepath = storage_path('app/private/' . $filename);
+        $mimetype = Storage::mimeType('private/' . $filename);
         $headers = [
-          'Content-Type' => $mimetype,
-          'Content-Disposition' => 'attachment; filename="'.$filename.'"',
-          'Access-Control-Expose-Headers' => 'Content-Disposition'
+            'Content-Type' => $mimetype,
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+            'Access-Control-Expose-Headers' => 'Content-Disposition'
         ];
+
+        $material->download_count += 1;
+        $material->save();
 
         return response()->download($filepath, $material->name, $headers);
     }

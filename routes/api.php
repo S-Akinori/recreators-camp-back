@@ -50,6 +50,8 @@ Route::get('/users/{user_id}/materials', [UserMaterialController::class, 'index'
 Route::resource('/materials.likes', MaterialLikeController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
 Route::resource('/materials.favorites', MaterialFavoriteController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
 
+Route::middleware('auth:sanctum')->get('/user/favorites', [MaterialFavoriteController::class, 'index']);
+
 Route::middleware('auth:sanctum')->post('/materials/{id}/permission_request', [PermissionRequestController::class, 'send']);
 
 Route::middleware('auth:sanctum')->get('/permission_tokens/{id}', [PermissionRequestController::class, 'show']);

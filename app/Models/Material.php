@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -13,10 +14,14 @@ class Material extends Model
         'name',
         'description',
         'image',
+        'images',
         'file',
         'user_id',
         'category_id',
         'permission',
+        'download_count',
+        'like_count',
+        'favorite_count',
     ];
 
     public function user()
@@ -39,4 +44,16 @@ class Material extends Model
     {
         return $this->hasMany(PermissionToken::class);
     }
+    public function materialMetas()
+    {
+        return $this->hasMany(MaterialMeta::class);
+    }
+
+    protected function images(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => json_decode($value, true),
+            set: fn ($value) => json_encode($value),
+        );
+    } 
 }
