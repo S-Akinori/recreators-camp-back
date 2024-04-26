@@ -7,6 +7,7 @@ use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
 use App\Http\Controllers\MaterialLikeController;
+use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PermissionRequestController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMaterialController;
@@ -49,6 +50,9 @@ Route::get('/users/{user_id}/materials', [UserMaterialController::class, 'index'
 
 Route::resource('/materials.likes', MaterialLikeController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
 Route::resource('/materials.favorites', MaterialFavoriteController::class)->only(['store', 'destroy', 'show'])->middleware('auth:sanctum');
+Route::resource('news', NewsController::class)->only(['store', 'update', 'destroy', 'edit'])->middleware('auth:sanctum');
+Route::resource('news', NewsController::class)->only(['index']);
+Route::get('/news/{slug}', [NewsController::class, 'showBySlug']);
 
 Route::middleware('auth:sanctum')->get('/user/favorites', [MaterialFavoriteController::class, 'index']);
 
