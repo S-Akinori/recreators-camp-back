@@ -19,7 +19,7 @@ class UserSeeder extends Seeder
           [
             'name' => '管理者',
             'role' => 'admin',
-            'email' => 'admin@test.com',
+            'email' => 'admin@recreators-camp.com',
             'description' => '管理者アカウントです。',
             'password' => Hash::make('admin1234'),
             'image' => 'icon-user.png',
