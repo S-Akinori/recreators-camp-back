@@ -1,7 +1,10 @@
 <?php
 
+use App\Http\Controllers\AdminMaterialController;
+use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FileUploadController;
 use App\Http\Controllers\MaterialController;
@@ -43,6 +46,8 @@ Route::middleware('auth:sanctum')->post('/materials', [MaterialController::class
 
 Route::resource('/categories', CategoryController::class);
 Route::resource('/materials', MaterialController::class);
+Route::resource('/comments', CommentController::class)->only(['store', 'destroy', 'update'])->middleware('auth:sanctum');
+Route::resource('/comments', CommentController::class)->only(['index', 'show']);
 Route::middleware('auth:sanctum')->get('/materials/{id}', [MaterialController::class, 'show']);
 Route::get('/materials/{id}/download', [MaterialController::class, 'download']);
 
@@ -68,3 +73,6 @@ Route::get('/users/{id}', [UserController::class, 'show']);
 Route::post('/file', [FileUploadController::class, 'store']);
 
 Route::post('/contact', [ContactController::class, 'send']);
+
+Route::middleware('auth:sanctum')->put('/admin/users/{id}', [AdminUserController::class, 'update']);
+Route::middleware('auth:sanctum')->put('/admin/materials/{id}', [AdminMaterialController::class, 'update']);

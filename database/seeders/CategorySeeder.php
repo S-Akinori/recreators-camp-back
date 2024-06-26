@@ -19,52 +19,52 @@ class CategorySeeder extends Seeder
             [
               'name' => 'ツール',
               'slug' => 'tool',
-              'image' => 'icon-tool.png',
+              'image' => storage_path('app/public/categories') . '/icon-tool.png',
             ],
             [
               'name' => 'プラグイン',
               'slug' => 'plugin',
-              'image' => 'icon-plugin.png',
+              'image' => storage_path('app/public/categories') . '/icon-plugin.png',
             ],
             [
               'name' => 'BGM',
               'slug' => 'bgm',
-              'image' => 'icon-bgm.png',
+              'image' => storage_path('app/public/categories') . '/icon-bgm.png',
             ],
             [
               'name' => '効果音',
               'slug' => 'se',
-              'image' => 'icon-se.png',
+              'image' => storage_path('app/public/categories') . '/icon-se.png',
             ],
             [
               'name' => 'ボイス',
               'slug' => 'voice',
-              'image' => 'icon-voice.png',
+              'image' => storage_path('app/public/categories') . '/icon-voice.png',
             ],
             [
               'name' => '立ち絵',
               'slug' => 'picture',
-              'image' => 'icon-picture.png',
+              'image' => storage_path('app/public/categories') . '/icon-picture.png',
             ],
             [
               'name' => 'キャラドット',
               'slug' => 'dot',
-              'image' => 'icon-dot.png',
+              'image' => storage_path('app/public/categories') . '/icon-dot.png',
             ],
             [
               'name' => 'MAP',
               'slug' => 'map',
-              'image' => 'icon-map.png',
+              'image' => storage_path('app/public/categories') . '/icon-map.png',
             ],
             [
               'name' => 'UI',
               'slug' => 'ui',
-              'image' => 'icon-ui.png',
+              'image' => storage_path('app/public/categories') . '/icon-ui.png',
             ],
             [
               'name' => '背景',
               'slug' => 'background',
-              'image' => 'icon-background.png',
+              'image' => storage_path('app/public/categories') . '/icon-background.png',
             ]
           ]
       );

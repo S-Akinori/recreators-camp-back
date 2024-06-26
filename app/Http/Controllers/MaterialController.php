@@ -16,11 +16,11 @@ class MaterialController extends Controller
     public function index(Request $request)
     {
         if ($request->has('category_id')) {
-            $query = Material::with('user')->where('category_id', $request->category_id);
+            $query = Material::with(['user', 'category'])->where('category_id', $request->category_id);
         } else if ($request->has('user_id')) {
-            $query = Material::with('user')->where('user_id', $request->user_id);
+            $query = Material::with(['user', 'category'])->where('user_id', $request->user_id);
         } else {
-            $query = Material::with('user');
+            $query = Material::with(['user', 'category']);
         }
 
         $order_by = $request->order_by ?? 'download_count';
@@ -58,8 +58,6 @@ class MaterialController extends Controller
             // ファイルパスを配列に追加
             $paths[] = config('app.url') . Storage::url($path);
         }
-
-        Log::debug($paths);
 
         $file_path = config('app.url') . Storage::url($file);
 

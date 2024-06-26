@@ -22,6 +22,7 @@ class Material extends Model
         'download_count',
         'like_count',
         'favorite_count',
+        'status'
     ];
 
     public function user()
@@ -47,6 +48,10 @@ class Material extends Model
     public function materialMetas()
     {
         return $this->hasMany(MaterialMeta::class);
+    }
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
     }
 
     protected function images(): Attribute
