@@ -182,4 +182,16 @@ class MaterialController extends Controller
 
         return response()->download($filepath, $material->name, $headers);
     }
+
+    public function search(Request $request)
+    {
+        $query = $request->input('query');
+
+        $results = Material::where('title', 'like', "%{$query}%")
+            ->orWhere('description', 'like', "%{$query}%")
+            ->get();
+
+        return response()->json($results);
+    }
+
 }

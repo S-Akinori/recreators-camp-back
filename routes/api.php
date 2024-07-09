@@ -12,6 +12,7 @@ use App\Http\Controllers\MaterialFavoriteController;
 use App\Http\Controllers\MaterialLikeController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PermissionRequestController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMaterialController;
 use Illuminate\Http\Request;
@@ -76,3 +77,5 @@ Route::post('/contact', [ContactController::class, 'send']);
 
 Route::middleware('auth:sanctum')->put('/admin/users/{id}', [AdminUserController::class, 'update']);
 Route::middleware('auth:sanctum')->put('/admin/materials/{id}', [AdminMaterialController::class, 'update']);
+
+Route::get('/search', [SearchController::class, 'search']);
