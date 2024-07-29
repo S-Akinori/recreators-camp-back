@@ -7,12 +7,14 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FileUploadController;
+use App\Http\Controllers\FollowController;
 use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
 use App\Http\Controllers\MaterialLikeController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PermissionRequestController;
 use App\Http\Controllers\SearchController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserMaterialController;
 use Illuminate\Http\Request;
@@ -47,6 +49,8 @@ Route::middleware('auth:sanctum')->post('/materials', [MaterialController::class
 
 Route::resource('/categories', CategoryController::class);
 Route::resource('/materials', MaterialController::class);
+Route::get('/materials/tag/{tag}', [MaterialController::class, 'getMaterialsByTag']);
+
 Route::resource('/comments', CommentController::class)->only(['store', 'destroy', 'update'])->middleware('auth:sanctum');
 Route::resource('/comments', CommentController::class)->only(['index', 'show']);
 Route::middleware('auth:sanctum')->get('/materials/{id}', [MaterialController::class, 'show']);
@@ -79,3 +83,15 @@ Route::middleware('auth:sanctum')->put('/admin/users/{id}', [AdminUserController
 Route::middleware('auth:sanctum')->put('/admin/materials/{id}', [AdminMaterialController::class, 'update']);
 
 Route::get('/search', [SearchController::class, 'search']);
+
+Route::get('/tags', [TagController::class, 'index']);
+Route::post('/tags', [TagController::class, 'store']);
+Route::get('/tags/{id}', [TagController::class, 'show']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/users/{user}/is-following', [UserController::class, 'isFollowing']);
+    Route::post('/users/{user}/follow', [FollowController::class, 'follow']);
+    Route::post('/users/{user}/unfollow', [FollowController::class, 'unfollow']);
+});
+Route::get('/users/{user}/followers', [FollowController::class, 'followers']);
+Route::get('/users/{user}/followings', [FollowController::class, 'followings']);

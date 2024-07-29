@@ -22,7 +22,8 @@ class Material extends Model
         'download_count',
         'like_count',
         'favorite_count',
-        'status'
+        'status',
+        'is_ai_generated' // 新しいカラムを追加
     ];
 
     public function user()
@@ -60,5 +61,10 @@ class Material extends Model
             get: fn ($value) => json_decode($value, true),
             set: fn ($value) => json_encode($value),
         );
-    } 
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
+    }
 }

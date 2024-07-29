@@ -27,7 +27,13 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'max:255',
                 Rule::unique('users')->ignore($user->id),
             ],
-
+            'role' => ['string', 'max:64'],
+            'description' => ['string', 'max:256', 'nullable'],
+            'skill' => ['string', 'max:512', 'nullable'],
+            'x_link' => ['string', 'url:http,https', 'nullable'],
+            'website' => ['string', 'url:http,https', 'nullable'],
+            'created_game' => ['string', 'max:512', 'nullable'],
+            'contributed_game' => ['string', 'max:512', 'nullable'],
             'image' => ['string']
         ])->validateWithBag('updateProfileInformation');
 
@@ -42,8 +48,14 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             $user->forceFill([
                 'name' => $input['name'],
                 'email' => $input['email'],
+                'role' => $input['role'],
                 'description' => $input['description'],
                 'image' => $input['image'],
+                'skill' => $input['skill'],
+                'x_link' => $input['x_link'],
+                'website' => $input['website'],
+                'created_game' => $input['created_game'],
+                'contributed_game' => $input['contributed_game'],
             ])->save();
         }
     }

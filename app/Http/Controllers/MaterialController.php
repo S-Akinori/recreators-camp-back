@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Material;
+use App\Models\Tag;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Symfony\Component\ErrorHandler\Debug;
 
 class MaterialController extends Controller
 {
@@ -15,18 +17,39 @@ class MaterialController extends Controller
      */
     public function index(Request $request)
     {
+        $query = Material::query();
+
+        if ($request->has('tag_id')) {
+            $query->whereHas('tags', function ($q) use ($request) {
+                $q->where('id', $request->input('tag_id'));
+            });
+        }
+
         if ($request->has('category_id')) {
-            $query = Material::with(['user', 'category'])->where('category_id', $request->category_id);
-        } else if ($request->has('user_id')) {
-            $query = Material::with(['user', 'category'])->where('user_id', $request->user_id);
-        } else {
-            $query = Material::with(['user', 'category']);
+            $query->where('category_id', $request->input('category_id'));
+        }
+
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->input('user_id'));
+        }
+
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('description', 'like', "%{$search}%");
+            });
+        }
+
+        if($request->input('except_ai') == 1) {
+            Log::debug($request->input('except_ai'));
+            $query->where('is_ai_generated', 0);
         }
 
         $order_by = $request->order_by ?? 'download_count';
+        $query->orderBy($order_by, 'desc');
 
-        $materials = $query->orderBy($order_by, 'desc')->paginate(8);
-        return $materials;
+        return $query->with(['tags', 'user', 'category'])->paginate(8);
     }
 
 
@@ -45,22 +68,24 @@ class MaterialController extends Controller
             'file' => 'required|file',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+            'is_ai_generated' => 'boolean',
         ]);
 
-        
+
         $file = $request->file('file')->store('private');
-        
+
         $paths = [];
         foreach ($request->file('images') as $image) {
             // 画像ファイルを保存する処理
             $path = $image->store('public');
-            
+
             // ファイルパスを配列に追加
             $paths[] = config('app.url') . Storage::url($path);
         }
 
         $file_path = config('app.url') . Storage::url($file);
-
 
         $material = Material::create([
             'name' => $validated['name'],
@@ -71,7 +96,14 @@ class MaterialController extends Controller
             'user_id' => auth()->id(),
             'category_id' => $validated['category_id'],
             'permission' => $validated['permission'],
+            'is_ai_generated' => $validated['is_ai_generated'] ?? false, // 新しいカラムの設定
+
         ]);
+
+        // タグの関連付け
+        if (isset($validated['tags'])) {
+            $material->tags()->sync($validated['tags']);
+        }
 
         return $material;
     }
@@ -85,6 +117,7 @@ class MaterialController extends Controller
             $userId = Auth::id();
             $material = Material::with([
                 'user',
+                'tags',
                 'likes' => function ($query) use ($userId) {
                     $query->where('user_id', $userId);
                 },
@@ -96,7 +129,7 @@ class MaterialController extends Controller
                 }
             ])->find($id);
         } else {
-            $material = Material::with('user')->find($id);
+            $material = Material::with(['user', 'tags'])->find($id);
         }
 
         return $material;
@@ -115,6 +148,9 @@ class MaterialController extends Controller
             'file' => 'file',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
+            'is_ai_generated' => 'boolean',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
 
         $material = Material::find($id);
@@ -125,12 +161,12 @@ class MaterialController extends Controller
                 $exists = Storage::disk('public')->exists($filename);
                 Log::debug($filename);
                 Log::debug($exists);
-                if($exists) {
+                if ($exists) {
                     $paths[] = config('app.url') . Storage::url($filename);
                 } else {
                     // 画像ファイルを保存する処理
                     $path = $image->store('public');
-                    
+
                     // ファイルパスを配列に追加
                     $paths[] = config('app.url') . Storage::url($path);
                 }
@@ -149,7 +185,12 @@ class MaterialController extends Controller
         $material->description = $validated['description'];
         $material->category_id = $validated['category_id'];
         $material->permission = $validated['permission'];
+        $material->is_ai_generated = $validated['is_ai_generated'];
         $material->save();
+
+        if (isset($validated['tags'])) {
+            $material->tags()->sync($validated['tags']);
+        }
 
         return $material;
     }
@@ -194,4 +235,13 @@ class MaterialController extends Controller
         return response()->json($results);
     }
 
+    public function getMaterialsByTag($tagId, Request $request)
+    {
+        // タグIDに関連する素材を取得
+        $tag = Tag::findOrFail($tagId);
+        $order_by = $request->order_by ?? 'download_count';
+        $materials = $tag->materials()->with('tags')->orderBy($order_by,'desc')->paginate(8);
+
+        return $materials;
+    }
 }
