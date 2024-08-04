@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\MaterialCreated;
 use App\Models\Material;
 use App\Models\Tag;
 use Illuminate\Http\Request;
@@ -104,6 +105,8 @@ class MaterialController extends Controller
         if (isset($validated['tags'])) {
             $material->tags()->sync($validated['tags']);
         }
+
+        event(new MaterialCreated($material));
 
         return $material;
     }

@@ -52,6 +52,7 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'last_login_at' => 'datetime',
     ];
 
     public function materials()
@@ -95,5 +96,9 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isFollowing($userId)
     {
         return $this->followings()->where('following_id', $userId)->exists();
+    }
+    public function notifications()
+    {
+        return $this->hasMany(Notification::class);
     }
 }

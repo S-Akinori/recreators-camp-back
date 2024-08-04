@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Events\MaterialFavorited;
+use App\Events\MaterialLiked;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -41,6 +43,19 @@ class Material extends Model
     public function favorites()
     {
         return $this->hasMany(Favorite::class);
+    }
+    // 「いいね」が追加されたときの処理
+    public function like()
+    {
+        $this->increment('like_count');
+        event(new MaterialLiked($this));
+    }
+
+    // 「お気に入り」が追加されたときの処理
+    public function favorite()
+    {
+        $this->increment('favorite_count');
+        event(new MaterialFavorited($this));
     }
     public function permissionTokens()
     {

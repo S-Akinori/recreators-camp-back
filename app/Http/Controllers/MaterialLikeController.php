@@ -28,8 +28,7 @@ class MaterialLikeController extends Controller
             'material_id' => $id,
         ]);
         $material = Material::find($id);
-        $material->like_count += 1;
-        $material->save();
+        $material->like();
         return $like;
     }
 

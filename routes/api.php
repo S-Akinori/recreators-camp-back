@@ -12,6 +12,7 @@ use App\Http\Controllers\MaterialController;
 use App\Http\Controllers\MaterialFavoriteController;
 use App\Http\Controllers\MaterialLikeController;
 use App\Http\Controllers\NewsController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionRequestController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
@@ -95,3 +96,8 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 Route::get('/users/{user}/followers', [FollowController::class, 'followers']);
 Route::get('/users/{user}/followings', [FollowController::class, 'followings']);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+});

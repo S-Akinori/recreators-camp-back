@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserFollowed;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,8 @@ class FollowController extends Controller
 
         if (!$currentUser->followings()->where('following_id', $user->id)->exists()) {
             $currentUser->followings()->attach($user->id);
+
+            event(new UserFollowed($currentUser, $user));
         }
 
         return response()->json(['message' => 'Followed successfully.']);

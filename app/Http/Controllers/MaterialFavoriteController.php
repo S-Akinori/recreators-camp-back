@@ -33,8 +33,7 @@ class MaterialFavoriteController extends Controller
         ]);
 
         $material = Material::find($id);
-        $material->favorite_count += 1;
-        $material->save();
+        $material->favorite();
         return $like;
     }
 

@@ -2,6 +2,17 @@
 
 namespace App\Providers;
 
+use App\Events\MaterialCreated;
+use App\Events\MaterialFavorited;
+use App\Events\MaterialLiked;
+use App\Events\UserFollowed;
+use App\Listeners\SendFavoriteNotification;
+use App\Listeners\SendFirstLoginNotification;
+use App\Listeners\SendFollowNotification;
+use App\Listeners\SendLikeNotification;
+use App\Listeners\SendNewMaterialNotification;
+use App\Listeners\UpdateLastLoginAt;
+use Illuminate\Auth\Events\Login;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -15,8 +26,24 @@ class EventServiceProvider extends ServiceProvider
      * @var array<class-string, array<int, class-string>>
      */
     protected $listen = [
+        UserFollowed::class => [
+            SendFollowNotification::class,
+        ],
         Registered::class => [
             SendEmailVerificationNotification::class,
+        ],
+        MaterialLiked::class => [
+            SendLikeNotification::class,
+        ],
+        MaterialFavorited::class => [
+            SendFavoriteNotification::class,
+        ],
+        Login::class => [
+            SendFirstLoginNotification::class,
+            UpdateLastLoginAt::class,
+        ],
+        MaterialCreated::class => [
+            SendNewMaterialNotification::class,
         ],
     ];
 
@@ -25,7 +52,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        parent::boot();
     }
 
     /**
