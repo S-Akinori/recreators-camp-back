@@ -101,4 +101,10 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Notification::class);
     }
+
+       // お気に入りの素材
+       public function favoriteMaterials()
+       {
+           return $this->belongsToMany(Material::class, 'favorites', 'user_id', 'material_id')->withTimestamps();
+       }
 }

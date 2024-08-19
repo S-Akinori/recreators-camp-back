@@ -18,7 +18,7 @@ class MaterialController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Material::query();
+        $query = Material::active();
 
         if ($request->has('tag_id')) {
             $query->whereHas('tags', function ($q) use ($request) {
@@ -43,7 +43,6 @@ class MaterialController extends Controller
         }
 
         if($request->input('except_ai') == 1) {
-            Log::debug($request->input('except_ai'));
             $query->where('is_ai_generated', 0);
         }
 
@@ -62,8 +61,8 @@ class MaterialController extends Controller
     {
         //
         $validated = $request->validate([
-            'name' => 'required',
-            'description' => 'required',
+            'name' => 'required|string|max:50',
+            'description' => 'required|string|max:400',
             'images' => 'required|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'file' => 'required|file',
@@ -97,8 +96,7 @@ class MaterialController extends Controller
             'user_id' => auth()->id(),
             'category_id' => $validated['category_id'],
             'permission' => $validated['permission'],
-            'is_ai_generated' => $validated['is_ai_generated'] ?? false, // 新しいカラムの設定
-
+            'is_ai_generated' => $validated['is_ai_generated'] ?? false, // 新しいカラムの設定]
         ]);
 
         // タグの関連付け
@@ -162,8 +160,6 @@ class MaterialController extends Controller
             foreach ($request->file('images') as $image) {
                 $filename = $image->getClientOriginalName();
                 $exists = Storage::disk('public')->exists($filename);
-                Log::debug($filename);
-                Log::debug($exists);
                 if ($exists) {
                     $paths[] = config('app.url') . Storage::url($filename);
                 } else {

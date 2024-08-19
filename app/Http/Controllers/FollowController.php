@@ -41,9 +41,17 @@ class FollowController extends Controller
         return response()->json($followers);
     }
 
-    public function followings(User $user)
+    public function followings(Request $request, User $user)
     {
-        $followings = $user->followings()->paginate(8);
+        $query = $user->followings();
+
+        // 名前検索の処理
+        if ($request->has('search')) {
+            $search = $request->input('search');
+            $query->where('name', 'like', '%' . $search . '%');
+        }
+    
+        $followings = $query->paginate(8);
         return response()->json($followings);
     }
 }

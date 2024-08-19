@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Events\MaterialFavorited;
 use App\Events\MaterialLiked;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -82,4 +83,29 @@ class Material extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+    // この素材をお気に入りにしたユーザー
+    public function favoritedBy()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'material_id', 'user_id')->withTimestamps();
+    }
+
+        // アクティブな素材
+        public function scopeActive(Builder $query)
+        {
+            return $query->where('status', 'active');
+        }
+    
+        // 作成者が見るための素材（アクティブまたはインアクティブ）
+        public function scopeVisibleToUser(Builder $query, $userId)
+        {
+            return $query->where(function ($query) use ($userId) {
+                $query->where('status', 'active')
+                      ->orWhere(function ($query) use ($userId) {
+                          $query->where('status', 'inactive')
+                                ->where('user_id', $userId);
+                      });
+            });
+
+            // return $query->where('status', 'active')->orWhere('status', 'inactive');
+        }
 }

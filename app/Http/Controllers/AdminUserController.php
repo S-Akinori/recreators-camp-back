@@ -14,6 +14,7 @@ use Symfony\Component\ErrorHandler\Debug;
 
 class AdminUserController extends Controller
 {
+    
     public function update(Request $request, $id)
     {
         if(Auth::user()->id != 1) {

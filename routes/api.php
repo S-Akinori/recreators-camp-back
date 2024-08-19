@@ -3,6 +3,7 @@
 use App\Http\Controllers\AdminMaterialController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\AuthMaterialController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\ContactController;
@@ -100,4 +101,8 @@ Route::get('/users/{user}/followings', [FollowController::class, 'followings']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('/user/materials', [AuthMaterialController::class, 'index']);
 });

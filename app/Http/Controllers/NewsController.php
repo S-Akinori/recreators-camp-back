@@ -41,7 +41,7 @@ class NewsController extends Controller
             'title' => 'required|max:255',
             'content' => 'required',
             'image' => 'nullable|image',
-            'slug' => 'required|unique:news'
+            'slug' => 'unique:news'
         ]);
 
         $image_path = null;
@@ -55,7 +55,7 @@ class NewsController extends Controller
             'title' => $validated['title'],
             'content' => $validated['content'],
             'image' => $image_path,
-            'slug' => $validated['slug']
+            'slug' => $validated['slug'] ?? $validated['title']
         ]);
 
         return $news;
@@ -68,6 +68,7 @@ class NewsController extends Controller
     public function show(string $id)
     {
         //
+
     }
 
     public function showBySlug(string $slug)
@@ -100,7 +101,7 @@ class NewsController extends Controller
             'title' => 'required|max:255',
             'content' => 'required',
             'image' => 'nullable|image',
-            'slug' => 'required|unique:news,slug,' . $news->id
+            'slug' => 'unique:news,slug,' . $news->id
         ]);
 
         $image_path = $news->image;
@@ -112,7 +113,7 @@ class NewsController extends Controller
         $news->title = $validated['title'];
         $news->content = $validated['content'];
         $news->image = $image_path;
-        $news->slug = $validated['slug'];
+        $news->slug = $validated['slug'] ?? $validated['title'];
         $news->save();
 
         return $news;
