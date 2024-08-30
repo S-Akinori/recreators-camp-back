@@ -41,6 +41,35 @@ class NotificationController extends Controller
         return response()->json($notifications);
     }
 
+    public function indexAll () {
+        $notifications = Auth::user()->notifications()->paginate(10);
+        $notifications->transform(function ($notification) {
+            $data = $notification->data;
+
+            if ($notification->type === 'follow') {
+                $follower = User::find($data['follower_id']);
+                $data['follower_name'] = $follower ? $follower->name : 'Unknown';
+            }
+
+            if ($notification->type === 'like') {
+                $material = Material::find($data['material_id']);
+                $data['material_name'] = $material ? $material->name : 'Unknown';
+                $data['like_count'] = $data['like_count'];
+            }
+
+            if ($notification->type === 'favorite') {
+                $material = Material::find($data['material_id']);
+                $data['material_name'] = $material ? $material->name : 'Unknown';
+                $data['favorite_count'] = $data['favorite_count'];
+            }
+
+            $notification->data = $data;
+            return $notification;
+        });
+
+        return response()->json($notifications);
+    }
+
     public function markAsRead($id)
     {
         $notification = Notification::find($id);

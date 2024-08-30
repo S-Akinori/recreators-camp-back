@@ -17,7 +17,7 @@ class AdminMaterialController extends Controller
         $validated = $request->validate([
             'name' => 'nullable|string|max:255|',
             'description' => 'nullable|string|max:400',
-            'category_id' => 'required|exists:categories,id',
+            'category_id' => 'exists:categories,id',
         ]);
 
         $material = Material::find($id);

@@ -18,8 +18,6 @@ class ContactController extends Controller
             'content' => 'required',
         ]);
 
-        Log::info($request->all());
-
         Mail::to($request->email)->send(new ContactMail($request->all()));
         Mail::to(config('mail.from.address'))->send(new ContactNotificationMail($request->all()));
         return response()->json('Mail Sent.', 200);

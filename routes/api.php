@@ -15,6 +15,7 @@ use App\Http\Controllers\MaterialLikeController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PermissionRequestController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UserController;
@@ -100,9 +101,15 @@ Route::get('/users/{user}/followings', [FollowController::class, 'followings']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::get('/notifications/all', [NotificationController::class, 'indexAll']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/materials', [AuthMaterialController::class, 'index']);
+});
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/report/material', [ReportController::class, 'reportMaterial']);
+    Route::post('/report/comment', [ReportController::class, 'reportComment']);
 });

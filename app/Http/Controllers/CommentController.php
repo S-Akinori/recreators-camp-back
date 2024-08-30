@@ -13,12 +13,25 @@ class CommentController extends Controller
      */
     public function index(Request $request)
     {
-        //
-        if($request->material_id) {
-            return Comment::with(['user', 'material'])->where('material_id', $request->material_id)->paginate(10);
+        // 管理者ユーザーの場合はすべてのコメントを取得
+        if (Auth::check() && Auth::id() === 1) {
+            $query = Comment::with(['user', 'material']);
+        } else {
+            // 通常ユーザーの場合は、ユーザーとコメントのステータスがアクティブなもののみ取得
+            $query = Comment::where('status', 'active')
+                            ->whereHas('user', function ($q) {
+                                $q->where('status', 'active');
+                            })
+                            ->with(['user', 'material']);
         }
-        return Comment::with(['user', 'material'])->paginate(10);
-    }
+    
+        if ($request->material_id) {
+            $query->where('material_id', $request->material_id);
+        }
+    
+        return $query->paginate(10);
+    }    
+    
 
     /**
      * Show the form for creating a new resource.
@@ -46,7 +59,7 @@ class CommentController extends Controller
             'material_id' => $validated['material_id'],
             'user_id' => $user->id,
             'status' => $validated['status'],
-        ]);
+        ])->load(['user', 'material']);
     }
 
     /**

@@ -99,11 +99,9 @@ class Material extends Model
         public function scopeVisibleToUser(Builder $query, $userId)
         {
             return $query->where(function ($query) use ($userId) {
-                $query->where('status', 'active')
-                      ->orWhere(function ($query) use ($userId) {
-                          $query->where('status', 'inactive')
-                                ->where('user_id', $userId);
-                      });
+                $query->where('user_id', $userId)
+                      ->where('status', 'active')
+                      ->orWhere('status', 'inactive');
             });
 
             // return $query->where('status', 'active')->orWhere('status', 'inactive');

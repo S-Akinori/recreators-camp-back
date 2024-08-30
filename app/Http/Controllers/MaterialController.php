@@ -18,7 +18,14 @@ class MaterialController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Material::active();
+        // 管理者ユーザーの場合はすべての素材を取得
+        if (Auth::check() && Auth::id() === 1) {
+            $query = Material::query();
+        } else {
+            // 通常ユーザーの場合はステータスがアクティブな素材のみ取得
+            $query = Material::active();
+        }
+
 
         if ($request->has('tag_id')) {
             $query->whereHas('tags', function ($q) use ($request) {
@@ -114,27 +121,54 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
-        if (auth()->check()) {
+        if (Auth::check()) {
             $userId = Auth::id();
-            $material = Material::with([
-                'user',
-                'tags',
-                'likes' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                },
-                'favorites' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                },
-                'permissionTokens' => function ($query) use ($userId) {
-                    $query->where('user_id', $userId);
-                }
-            ])->find($id);
+    
+            // 管理者ユーザーの場合はステータスを問わずに取得
+            if ($userId === 1) {
+                $material = Material::with([
+                    'user',
+                    'tags',
+                    'likes' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    },
+                    'favorites' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    },
+                    'permissionTokens' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }
+                ])->find($id);
+            } else {
+                // 通常ユーザーの場合はアクティブな素材のみ取得
+                $material = Material::with([
+                    'user',
+                    'tags',
+                    'likes' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    },
+                    'favorites' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    },
+                    'permissionTokens' => function ($query) use ($userId) {
+                        $query->where('user_id', $userId);
+                    }
+                ])->where('status', 'active')->find($id);
+            }
         } else {
-            $material = Material::with(['user', 'tags'])->find($id);
+            // 未ログインの場合もアクティブな素材のみ取得
+            $material = Material::with(['user', 'tags'])
+                ->where('status', 'active')
+                ->find($id);
         }
-
+    
+        if (!$material) {
+            return response()->json(['message' => 'Not Found'], 404);
+        }
+    
         return $material;
     }
+    
 
     /**
      * Update the specified resource in storage.
