@@ -36,23 +36,29 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::updateUserPasswordsUsing(UpdateUserPassword::class);
         Fortify::resetUserPasswordsUsing(ResetUserPassword::class);
 
-        // Fortify::authenticateUsing(function (Request $request) {
-        //   Log::debug("login");
-        //   $user = User::where('email', $request->email)->first();
-   
-        //   if ($user &&
-        //       Hash::check($request->password, $user->password)) {
-        //       return $user;
-        //   }
-        // });
-
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
             return Limit::perMinute(5)->by($throttleKey);
         });
 
         RateLimiter::for('two-factor', function (Request $request) {
             return Limit::perMinute(5)->by($request->session()->get('login.id'));
+        });
+
+        // カスタム認証ロジック
+        Fortify::authenticateUsing(function (Request $request) {
+            $user = User::where('email', $request->email)->first();
+
+            if ($user && Hash::check($request->password, $user->password)) {
+                // statusがdeletedの場合、ログインさせない
+                if ($user->status === 'deleted') {
+                    return null;  // これで認証失敗として扱われます
+                }
+
+                return $user;
+            }
+
+            return null;
         });
     }
 }

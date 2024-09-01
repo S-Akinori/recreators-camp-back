@@ -54,7 +54,7 @@ Route::resource('/categories', CategoryController::class);
 Route::resource('/materials', MaterialController::class);
 Route::get('/materials/tag/{tag}', [MaterialController::class, 'getMaterialsByTag']);
 
-Route::resource('/comments', CommentController::class)->only(['store', 'destroy', 'update'])->middleware('auth:sanctum');
+Route::resource('/comments', CommentController::class)->only(['store', 'destroy', 'update'])->middleware(['auth:sanctum', 'checkStatus']);
 Route::resource('/comments', CommentController::class)->only(['index', 'show']);
 Route::middleware('auth:sanctum')->get('/materials/{id}', [MaterialController::class, 'show']);
 Route::get('/materials/{id}/download', [MaterialController::class, 'download']);
@@ -109,7 +109,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user/materials', [AuthMaterialController::class, 'index']);
 });
 
-Route::middleware('auth:sanctum')->group(function () {
+Route::middleware(['auth:sanctum', 'checkStatus'])->group(function () {
     Route::post('/report/material', [ReportController::class, 'reportMaterial']);
     Route::post('/report/comment', [ReportController::class, 'reportComment']);
 });

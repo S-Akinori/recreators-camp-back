@@ -26,10 +26,9 @@ class MaterialController extends Controller
             $query = Material::active();
         }
 
-
         if ($request->has('tag_id')) {
             $query->whereHas('tags', function ($q) use ($request) {
-                $q->where('id', $request->input('tag_id'));
+                $q->where('tags.id', $request->input('tag_id'));
             });
         }
 
