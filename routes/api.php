@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AdminMaterialController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\Auth\SocialiteController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\AuthMaterialController;
 use App\Http\Controllers\CategoryController;
@@ -113,3 +114,6 @@ Route::middleware(['auth:sanctum', 'checkStatus'])->group(function () {
     Route::post('/report/material', [ReportController::class, 'reportMaterial']);
     Route::post('/report/comment', [ReportController::class, 'reportComment']);
 });
+
+Route::post('/login/social/{provider}', [SocialiteController::class, 'redirectToProvider']);
+Route::get('/login/social/{provider}/callback', [SocialiteController::class, 'handleProviderCallback']);

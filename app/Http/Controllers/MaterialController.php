@@ -26,14 +26,14 @@ class MaterialController extends Controller
             $query = Material::active();
         }
 
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->input('category_id'));
+        }
+
         if ($request->has('tag_id')) {
             $query->whereHas('tags', function ($q) use ($request) {
                 $q->where('tags.id', $request->input('tag_id'));
             });
-        }
-
-        if ($request->has('category_id')) {
-            $query->where('category_id', $request->input('category_id'));
         }
 
         if ($request->has('user_id')) {
@@ -42,10 +42,18 @@ class MaterialController extends Controller
 
         if ($request->has('search')) {
             $search = $request->input('search');
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
-            });
+            // 最初の文字が#の場合はタグ検索
+            if (strpos($search, '#') === 0) {
+                $tag_name = substr($search, 1);
+                $query->whereHas('tags', function ($q) use ($tag_name) {
+                    $q->where('tags.name', $tag_name);
+                });
+            } else {
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('description', 'like', "%{$search}%");
+                });
+            }
         }
 
         if($request->input('except_ai') == 1) {

@@ -31,7 +31,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'created_game',
         'contributed_game',
         'status',
-        'last_login_at'
+        'last_login_at',
+        'email_verified_at'
     ];
 
     /**
@@ -102,9 +103,14 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasMany(Notification::class);
     }
 
-       // お気に入りの素材
-       public function favoriteMaterials()
-       {
-           return $this->belongsToMany(Material::class, 'favorites', 'user_id', 'material_id')->withTimestamps();
-       }
+    // お気に入りの素材
+    public function favoriteMaterials()
+    {
+        return $this->belongsToMany(Material::class, 'favorites', 'user_id', 'material_id')->withTimestamps();
+    }
+
+    public function socialAccounts()
+    {
+        return $this->hasMany(SocialAccount::class);
+    }
 }

@@ -4,6 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 use Laravel\Fortify\Contracts\UpdatesUserProfileInformation;
@@ -17,6 +18,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input): void
     {
+        Log::info($input);
         Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
 
@@ -34,7 +36,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'website' => ['string', 'url:http,https', 'nullable'],
             'created_game' => ['string', 'max:512', 'nullable'],
             'contributed_game' => ['string', 'max:512', 'nullable'],
-            'image' => ['string']
+            'image' => ['string', 'nullable']
         ])->validateWithBag('updateProfileInformation');
 
         if(!array_key_exists('image', $input)) {
