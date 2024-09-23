@@ -43,7 +43,7 @@ class ReportController extends Controller
             'description' => $validated['description'],
         ]);
 
-        Mail::to('admin@example.com')->send(new ReportMail($report));
+        Mail::to(config('mail.from.address'))->send(new ReportMail($report));
 
         return response()->json(['message' => '通報が送信されました。', 'report' => $report], 200);
     }
