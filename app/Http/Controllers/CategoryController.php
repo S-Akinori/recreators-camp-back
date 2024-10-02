@@ -52,7 +52,7 @@ class CategoryController extends Controller
         if(!$category) {
             return response()->json(['message' => 'Category not found'], 404);
         }
-        $materials = $category->materials()->with('user')->orderBy($order_by, 'desc')->paginate(8);
+        $materials = $category->materials()->with('user')->orderBy($order_by, 'desc')->paginate(20);
         return ['category' => $category, 'materials' => $materials];
     }
 

@@ -43,7 +43,7 @@ class MaterialFavoriteController extends Controller
 
         $order_by = $request->order_by ?? 'download_count';
         $query->orderBy($order_by, 'desc');
-        $favoriteMaterials = $query->paginate(8);
+        $favoriteMaterials = $query->paginate(20);
         return response()->json($favoriteMaterials, 200);
     }
 

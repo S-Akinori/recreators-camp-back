@@ -37,7 +37,7 @@ class FollowController extends Controller
 
     public function followers(User $user)
     {
-        $followers = $user->followers()->paginate(8);
+        $followers = $user->followers()->paginate(20);
         return response()->json($followers);
     }
 
@@ -51,7 +51,7 @@ class FollowController extends Controller
             $query->where('name', 'like', '%' . $search . '%');
         }
     
-        $followings = $query->paginate(8);
+        $followings = $query->paginate(20);
         return response()->json($followings);
     }
 }

@@ -33,7 +33,7 @@ class UserController extends Controller
             $query->where('role', $request->role);
         }
     
-        $users = $query->paginate(8);
+        $users = $query->paginate(20);
         
         return $users;
     }

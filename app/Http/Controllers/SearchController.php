@@ -25,21 +25,21 @@ class SearchController extends Controller
                         ->orWhere('description', 'like', "%{$query}%");
                     })
                     ->with(['user', 'category'])
-                    ->paginate(8);
+                    ->paginate(20);
             } else {
                 $results = Material::where('name', 'like', "%{$query}%")
                     ->orWhere('description', 'like', "%{$query}%")
                     ->with(['user', 'category'])
-                    ->paginate(8);
+                    ->paginate(20);
             }
         } elseif ($type === 'users') {
             $results = User::where('name', 'like', "%{$query}%")
                 ->orWhere('email', 'like', "%{$query}%")
-                ->paginate(8);
+                ->paginate(20);
         } else if($type === 'comments') {
             $results = Comment::where('content', 'like', "%{$query}%")
                 ->with(['user', 'material'])
-                ->paginate(8);
+                ->paginate(20);
 
         } else {
             return response()->json(['error' => 'Invalid search type'], 400);

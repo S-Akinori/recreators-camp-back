@@ -42,6 +42,6 @@ class AuthMaterialController extends Controller
         $order_by = $request->order_by ?? 'download_count';
         $query->orderBy($order_by, 'desc');
 
-        return $query->with(['tags', 'user', 'category'])->paginate(8);
+        return $query->with(['tags', 'user', 'category'])->paginate(20);
     }
 }

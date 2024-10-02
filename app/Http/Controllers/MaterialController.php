@@ -63,7 +63,7 @@ class MaterialController extends Controller
         $order_by = $request->order_by ?? 'download_count';
         $query->orderBy($order_by, 'desc');
 
-        return $query->with(['tags', 'user', 'category'])->paginate(8);
+        return $query->with(['tags', 'user', 'category'])->paginate(20);
     }
 
 
@@ -280,7 +280,7 @@ class MaterialController extends Controller
         // タグIDに関連する素材を取得
         $tag = Tag::findOrFail($tagId);
         $order_by = $request->order_by ?? 'download_count';
-        $materials = $tag->materials()->with('tags')->orderBy($order_by,'desc')->paginate(8);
+        $materials = $tag->materials()->with('tags')->orderBy($order_by,'desc')->paginate(20);
 
         return $materials;
     }
