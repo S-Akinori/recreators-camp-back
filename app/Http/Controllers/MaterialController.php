@@ -76,10 +76,11 @@ class MaterialController extends Controller
         //
         $validated = $request->validate([
             'name' => 'required|string|max:50',
-            'description' => 'required|string|max:400',
-            'images' => 'required|array',
+            'description' => 'required|string|max:1000',
+            'image' => 'required|image|mimes:jpeg,png,jpg|max:5000',
+            'images' => 'array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'file' => 'required|file',
+            'file' => 'required|file|max:500000',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
             'tags' => 'nullable|array',
@@ -87,24 +88,27 @@ class MaterialController extends Controller
             'is_ai_generated' => 'boolean',
         ]);
 
-
         $file = $request->file('file')->store('private');
+        $image = $request->file('image')->store('public');
 
         $paths = [];
-        foreach ($request->file('images') as $image) {
-            // 画像ファイルを保存する処理
-            $path = $image->store('public');
-
-            // ファイルパスを配列に追加
-            $paths[] = config('app.url') . Storage::url($path);
+        if($request->images) {
+            foreach ($request->file('images') as $image) {
+                // 画像ファイルを保存する処理
+                $path = $image->store('public');
+    
+                // ファイルパスを配列に追加
+                $paths[] = config('app.url') . Storage::url($path);
+            }
         }
 
         $file_path = config('app.url') . Storage::url($file);
+        $image_path = config('app.url') . Storage::url($image);
 
         $material = Material::create([
             'name' => $validated['name'],
             'description' => $validated['description'],
-            'image' => $paths[0],
+            'image' => $image_path,
             'images' => $paths,
             'file' => $file_path,
             'user_id' => auth()->id(),
@@ -183,11 +187,12 @@ class MaterialController extends Controller
     public function update(Request $request, string $id)
     {
         $validated = $request->validate([
-            'name' => 'required',
-            'description' => 'required',
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'name' => 'required|string|max:50',
+            'description' => 'required|string|max:1000',
+            'image' => 'image|mimes:jpeg,png,jpg|max:5000',
+            'images' => 'array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'file' => 'file',
+            'file' => 'file|max:500000',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
             'is_ai_generated' => 'boolean',
@@ -212,13 +217,17 @@ class MaterialController extends Controller
                 }
             }
             $material->images = $paths;
-            $material->image = $paths[0];
         }
 
         if ($request->hasFile('file')) {
             $file = $request->file('file')->store('private');
             $file_path = config('app.url') . Storage::url($file);
             $material->file = $file_path;
+        }
+        if ($request->hasFile('image')) {
+            $image = $request->file('image')->store('public');
+            $image_path = config('app.url') . Storage::url($image);
+            $material->image = $image_path;
         }
 
         $material->name = $validated['name'];
