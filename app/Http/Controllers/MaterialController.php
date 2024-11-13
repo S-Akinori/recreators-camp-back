@@ -42,19 +42,28 @@ class MaterialController extends Controller
 
         if ($request->has('search')) {
             $search = $request->input('search');
+            
+            // 半角スペースと全角スペースに対応するために全角スペースを半角に変換して分割
+            $keywords = preg_split('/\s+/', mb_convert_kana($search, 's'));
+        
             // 最初の文字が#の場合はタグ検索
-            if (strpos($search, '#') === 0) {
-                $tag_name = substr($search, 1);
+            if (strpos($keywords[0], '#') === 0) {
+                $tag_name = substr($keywords[0], 1);
                 $query->whereHas('tags', function ($q) use ($tag_name) {
                     $q->where('tags.name', $tag_name);
                 });
             } else {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('description', 'like', "%{$search}%");
+                $query->where(function ($q) use ($keywords) {
+                    foreach ($keywords as $keyword) {
+                        $q->where(function ($q) use ($keyword) {
+                            $q->where('name', 'like', "%{$keyword}%")
+                                ->orWhere('description', 'like', "%{$keyword}%");
+                        });
+                    }
                 });
             }
         }
+        
 
         if($request->input('except_ai') == 1) {
             $query->where('is_ai_generated', 0);
