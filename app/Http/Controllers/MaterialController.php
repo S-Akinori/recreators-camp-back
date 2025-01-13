@@ -95,6 +95,7 @@ class MaterialController extends Controller
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
             'is_ai_generated' => 'boolean',
+            'status' => 'string'
         ]);
 
         $file = $request->file('file')->store('private');
@@ -124,6 +125,7 @@ class MaterialController extends Controller
             'category_id' => $validated['category_id'],
             'permission' => $validated['permission'],
             'is_ai_generated' => $validated['is_ai_generated'] ?? false, // 新しいカラムの設定]
+            'status' => $validated['status'] ?? 'active'
         ]);
 
         // タグの関連付け
@@ -141,52 +143,45 @@ class MaterialController extends Controller
      */
     public function show(string $id)
     {
+        $query = Material::with([
+            'user',
+            'tags',
+            'likes' => function ($query) {
+                $query->where('user_id', Auth::id());
+            },
+            'favorites' => function ($query) {
+                $query->where('user_id', Auth::id());
+            },
+            'permissionTokens' => function ($query) {
+                $query->where('user_id', Auth::id());
+            },
+        ]);
+
+        Log::debug('auth: ' . Auth::id());
+    
         if (Auth::check()) {
             $userId = Auth::id();
     
-            // 管理者ユーザーの場合はステータスを問わずに取得
             if ($userId === 1) {
-                $material = Material::with([
-                    'user',
-                    'tags',
-                    'likes' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    },
-                    'favorites' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    },
-                    'permissionTokens' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    }
-                ])->find($id);
+                // 管理者ユーザーはステータスを問わず取得可能
+                $material = $query->find($id);
             } else {
-                // 通常ユーザーの場合はアクティブな素材のみ取得
-                $material = Material::with([
-                    'user',
-                    'tags',
-                    'likes' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    },
-                    'favorites' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    },
-                    'permissionTokens' => function ($query) use ($userId) {
-                        $query->where('user_id', $userId);
-                    }
-                ])->where('status', 'active')->find($id);
+                // ログインユーザーが素材の所有者であればstatusを問わず取得
+                $material = $query->where(function ($query) use ($userId) {
+                    $query->where('status', 'active')
+                          ->orWhere('user_id', $userId);
+                })->find($id);
             }
         } else {
-            // 未ログインの場合もアクティブな素材のみ取得
-            $material = Material::with(['user', 'tags'])
-                ->where('status', 'active')
-                ->find($id);
+            // 未ログインユーザーはアクティブな素材のみ取得可能
+            $material = $query->where('status', 'active')->find($id);
         }
     
         if (!$material) {
             return response()->json(['message' => 'Not Found'], 404);
         }
     
-        return $material;
+        return response()->json($material);
     }
     
 
@@ -207,6 +202,7 @@ class MaterialController extends Controller
             'is_ai_generated' => 'boolean',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
+            'status' => 'string'
         ]);
 
         $material = Material::find($id);
@@ -244,6 +240,7 @@ class MaterialController extends Controller
         $material->category_id = $validated['category_id'];
         $material->permission = $validated['permission'];
         $material->is_ai_generated = $validated['is_ai_generated'];
+        $material->status = $validated['status'];
         $material->save();
 
         if (isset($validated['tags'])) {
