@@ -32,7 +32,7 @@ class PermissionRequestMail extends Mailable
     {
         return new Envelope(
             from: new Address(config('mail.from.address'), 'Recreators Camp'),
-            subject: '承認依頼が届いています',
+            subject: '素材ダウンロードリクエスト依頼が届いています！',
         );
     }
 

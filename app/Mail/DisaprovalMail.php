@@ -31,7 +31,7 @@ class DisaprovalMail extends Mailable
     {
         return new Envelope(
             from: new Address(config('mail.from.address'), 'Recreators Camp'),
-            subject: 'リクエストが承認されませんでした',
+            subject: '素材ダウンロードリクエストの承認結果が届きました！',
         );
     }
 
