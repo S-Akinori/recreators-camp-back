@@ -87,7 +87,7 @@ class MaterialController extends Controller
             'name' => 'required|string|max:50',
             'description' => 'required|string|max:1000',
             'image' => 'required|image|mimes:jpeg,png,jpg|max:5000',
-            'images' => 'array',
+            'images' => 'nullable|array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'file' => 'required|file|max:500000',
             'category_id' => 'required|exists:categories,id',
