@@ -100,10 +100,11 @@ class Material extends Model
         {
             return $query->where(function ($query) use ($userId) {
                 $query->where('user_id', $userId)
-                      ->where('status', 'active')
-                      ->orWhere('status', 'inactive');
+                      ->where(function ($q) {
+                          $q->where('status', 'active')
+                            ->orWhere('status', 'inactive');
+                      });
             });
-
-            // return $query->where('status', 'active')->orWhere('status', 'inactive');
         }
+        
 }

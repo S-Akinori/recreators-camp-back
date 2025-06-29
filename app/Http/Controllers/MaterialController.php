@@ -193,10 +193,10 @@ class MaterialController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:50',
             'description' => 'required|string|max:1000',
-            'image' => 'image|mimes:jpeg,png,jpg|max:5000',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:5000',
             'images' => 'array',
             'images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'file' => 'file|max:500000',
+            'file' => 'nullable|file|max:500000',
             'category_id' => 'required|exists:categories,id',
             'permission' => 'required',
             'is_ai_generated' => 'boolean',
